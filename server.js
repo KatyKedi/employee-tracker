@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('./db/connection');
 const routes = require('./routes');
+const init = require('./index');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -22,5 +23,6 @@ db.connect(err => {
     console.log('Database connected.');
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
+        init();
     });
 });

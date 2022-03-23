@@ -26,7 +26,7 @@ router.post('/departments', ({ body }, res) => {
     `;
     const params = [body.dp_name];
 
-    db.query(sql, params, (err, result) => {
+    db.promise().query(sql, params, (err, result) => {
         if (err) {
             res.status(400).json({ error: err.message });
             return;
@@ -35,7 +35,7 @@ router.post('/departments', ({ body }, res) => {
             message: 'success',
             data: body
         });
-    });
+    }).then( () => db.end());
 });
 
 module.exports = router;
