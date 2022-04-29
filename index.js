@@ -1,8 +1,7 @@
 const inquirer = require('inquirer');
-const express = require('express');
-const router = express.Router();
-
-router.use(require('./routes/index.js'));
+const { showDepartmentsQuery, addDepartmentQuery } = require('./utils/departments');
+const { showRolesQuery, addRoleQuery } = require('./utils/roles');
+const { showEmployeesQuery, addEmployeeQuery, updateEmployeeQuery } = require('./utils/employees');
 
 // Prompt user
 const promptUser = () => {
@@ -49,6 +48,18 @@ const promptUser = () => {
     });
 };
 
+const showDepartments = () => {
+
+}
+
+const showRoles = () => {
+
+}
+
+const showEmployees = () => {
+    
+}
+
 const addDepartment = () => {
     return inquirer.prompt([
         {
@@ -66,6 +77,7 @@ const addDepartment = () => {
         }
     ]).then(department => {
         const dp_name = department.department;
+        addDepartmentQuery(dp_name);
         console.log(`Added ${dp_name} to the list of departments.`);
         promptUser();
     });
@@ -112,7 +124,14 @@ const addRole = () => {
                 }
             }
         }
-    ])
+    ]).then(role => {
+        const title = role.role;
+        const salary = role.salary;
+        const department_id = role.department_id;
+        addRoleQuery(title, salary, department_id);
+        console.log(`Added ${title} to the list of roles.`);
+        promptUser();
+    });
 };
 
 const addEmployee = () => {
@@ -185,7 +204,15 @@ const addEmployee = () => {
             employeeData.manager_id = null;
             return employeeData;
         }
-    });
+    }).then(employeeData => {
+        const first_name = employeeData.first_name;
+        const last_name = employeeData.last_name;
+        const role_id = employeeData.role_id;
+        const manager_id = employeeData.manager_id;
+        addEmployeeQuery(first_name, last_name, role_id, manager_id);
+        console.log(`Added ${first_name} to the list of employees.`);
+        promptUser();
+    })
 };
 
 const updateEmployee = () => {
@@ -217,7 +244,11 @@ const updateEmployee = () => {
             }
         }
     ]).then(employeeUpdate => {
-        
+        const id = employeeUpdate.id;
+        const role_id = employeeUpdate.role_id;
+        updateEmployeeQuery(role_id, id);
+        console.log('Updated employee');
+        promptUser();
     })
 }
 
