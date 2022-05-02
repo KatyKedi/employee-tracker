@@ -49,15 +49,18 @@ const promptUser = () => {
 };
 
 const showDepartments = () => {
-
+    const rows = showDepartmentsQuery();
+    console.log(rows);
 }
 
 const showRoles = () => {
-
+    const rows = showRolesQuery();
+    console.log(rows);
 }
 
 const showEmployees = () => {
-    
+    const rows = showEmployeesQuery();
+    console.log(rows);
 }
 
 const addDepartment = () => {
