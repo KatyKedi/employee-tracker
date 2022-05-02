@@ -1,9 +1,8 @@
 const db = require('./db/connection');
-const init = require('./index');
+const promptUser = require('./index');
 
 // Start server after DB connection
 db.connect(err => {
     if (err) throw err;
-    console.log('Database connected.');
-    init();
+    promptUser();
 });

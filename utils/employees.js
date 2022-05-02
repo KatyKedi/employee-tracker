@@ -9,8 +9,9 @@ const showEmployeesQuery = () => {
     LEFT JOIN emp_role
     ON employee.role_id = emp_role.id`;
   
-    db.query(sql, () => {
-        return;
+    db.query(sql, (error, result) => {
+        if (error) throw error;
+        console.table(result);
     });
 };
 
@@ -21,8 +22,8 @@ const addEmployeeQuery = (first_name, last_name, role_id, manager_id) => {
     `;
     const params = [first_name, last_name, role_id, manager_id];
 
-    db.query(sql, params, (rows) => {
-        return rows;
+    db.query(sql, params, (error, result) => {
+        if (error) throw error;
     });
 };
 
@@ -32,14 +33,13 @@ const updateEmployeeQuery = (role_id, id) => {
     `UPDATE employee 
     SET role_id = ? 
     WHERE id = ?`;
+    
     const params = [role_id, id];
 
-    db.query(sql, params, () => {
-        if (!result.affectedRows) {
+    db.query(sql, params, (error, result) => {
+        if (error) {
             console.log('Employee not found');
-        } else {
-            return;
-        }
+        } 
     });
 };
 

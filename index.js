@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const db = require('./db/connection');
 const { showDepartmentsQuery, addDepartmentQuery } = require('./utils/departments');
 const { showRolesQuery, addRoleQuery } = require('./utils/roles');
 const { showEmployeesQuery, addEmployeeQuery, updateEmployeeQuery } = require('./utils/employees');
@@ -49,18 +50,18 @@ const promptUser = () => {
 };
 
 const showDepartments = () => {
-    const rows = showDepartmentsQuery();
-    console.log(rows);
+    showDepartmentsQuery();
+    promptUser();
 }
 
 const showRoles = () => {
-    const rows = showRolesQuery();
-    console.log(rows);
+    showRolesQuery();
+    promptUser();
 }
 
 const showEmployees = () => {
-    const rows = showEmployeesQuery();
-    console.log(rows);
+    showEmployeesQuery();
+    promptUser();
 }
 
 const addDepartment = () => {
@@ -87,176 +88,157 @@ const addDepartment = () => {
 };
 
 const addRole = () => {
-    return inquirer.prompt([
-        {
-            type: 'input',
-            name: 'role',
-            message: 'Please enter the name of the new role:',
-            validate: nameInput => {
-                if (nameInput) {
-                    return true;
-                } else {
-                    console.log('Please enter the role name!');
-                    return false;
+    db.query(`SELECT * FROM department`, (error, result) => {
+        if (error) throw error;
+        let departmentsArray = result.map(department => department.id)
+        return inquirer.prompt([
+            {
+                type: 'input',
+                name: 'role',
+                message: 'Please enter the name of the new role:',
+                validate: nameInput => {
+                    if (nameInput) {
+                        return true;
+                    } else {
+                        console.log('Please enter the role name!');
+                        return false;
+                    }
+                } 
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: 'Please enter the salary for this role:',
+                validate: nameInput => {
+                    if (nameInput) {
+                        return true;
+                    } else {
+                        console.log('Please enter the salary for this role!');
+                        return false;
+                    }
                 }
-            } 
-        },
-        {
-            type: 'input',
-            name: 'salary',
-            message: 'Please enter the salary for this role:',
-            validate: nameInput => {
-                if (nameInput) {
-                    return true;
-                } else {
-                    console.log('Please enter the salary for this role!');
-                    return false;
-                }
+            },
+            {
+                type: 'list',
+                name: 'department_id',
+                message: 'Please select from the following options:',
+                choices: departmentsArray
             }
-        },
-        {
-            type: 'list',
-            name: 'department_id',
-            message: 'Please enter the department id for this role:',
-            validate: nameInput => {
-                if (nameInput) {
-                    return true;
-                } else {
-                    console.log('Please enter the department id for this role!');
-                    return false;
-                }
-            }
-        }
-    ]).then(role => {
-        const title = role.role;
-        const salary = role.salary;
-        const department_id = role.department_id;
-        addRoleQuery(title, salary, department_id);
-        console.log(`Added ${title} to the list of roles.`);
-        promptUser();
+        ]).then(role => {
+            const title = role.role;
+            const salary = role.salary;
+            const department_id = role.department_id;
+            addRoleQuery(title, salary, department_id);
+            console.log(`Added ${title} to the list of roles.`);
+            promptUser();
+        });
     });
 };
 
 const addEmployee = () => {
-    return inquirer.prompt([
-        {
-            type: 'input',
-            name: 'first_name',
-            message: 'Please enter the first name of the new employee:',
-            validate: nameInput => {
-                if (nameInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the employee's first name!");
-                    return false;
-                }
-            } 
-        },
-        {
-            type: 'input',
-            name: 'last_name',
-            message: 'Please enter the last name of the new employee:',
-            validate: nameInput => {
-                if (nameInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the employee's last night!");
-                    return false;
-                }
-            }
-        },
-        {
-            type: 'list',
-            name: 'role_id',
-            message: 'Please enter the role id for this employee:',
-            validate: nameInput => {
-                if (nameInput) {
-                    return true;
-                } else {
-                    console.log('Please enter the role id for this employee!');
-                    return false;
-                }
-            }
-        },
-        {
-            type: 'confirm',
-            name: 'manager_confirm',
-            message: 'Do you have a manager id to add?'
-        }
-    ]).then(employeeData => {
-        if (employeeData.manager_confirm) {
-            inquirer.prompt([
-                {
-                    type: 'input',
-                    name: 'manager_id',
-                    message: "Please enter the employee's manager id:",
-                    validate: nameInput => {
-                        if (nameInput) {
-                            return true;
-                        } else {
-                            console.log('Please enter the manager id!');
-                            return false;
-                        }
+    db.query(`SELECT * FROM emp_role`, (error, result) => {
+        const rolesArray = result.map(role => role.id);
+        return inquirer.prompt([
+            {
+                type: 'input',
+                name: 'first_name',
+                message: 'Please enter the first name of the new employee:',
+                validate: nameInput => {
+                    if (nameInput) {
+                        return true;
+                    } else {
+                        console.log("Please enter the employee's first name!");
+                        return false;
+                    }
+                } 
+            },
+            {
+                type: 'input',
+                name: 'last_name',
+                message: 'Please enter the last name of the new employee:',
+                validate: nameInput => {
+                    if (nameInput) {
+                        return true;
+                    } else {
+                        console.log("Please enter the employee's last night!");
+                        return false;
                     }
                 }
-            ]).then(managerId => {
-                employeeData.manager_id = managerId;
-                return employeeData;
+            },
+            {
+                type: 'list',
+                name: 'role_id',
+                message: 'Please select the role id:',
+                choices: rolesArray
+            },
+            {
+                type: 'confirm',
+                name: 'manager_confirm',
+                message: 'Do you have a manager id to add?'
+            }
+        ]).then(employeeData => {
+            const first_name = employeeData.first_name;
+            const last_name = employeeData.last_name;
+            const role_id = employeeData.role_id;
+            const confirm = employeeData.manager_confirm;
+            db.query(`SELECT * FROM employee`, (error, result) => {
+                const employeeArray = result.map(employee => employee.id);
+                if (confirm) {
+                    return inquirer.prompt([
+                        {
+                            type: 'list',
+                            name: 'manager_id',
+                            message: "Please select the manager's id:",
+                            choices: employeeArray
+                        }
+                    ]).then(managerId => {
+                        const manager_id = managerId.manager_id;
+                        addEmployeeQuery(first_name, last_name, role_id, manager_id);
+                        console.log(`Added ${first_name} to the list of employees.`);
+                        promptUser();
+                    });
+                } else {
+                    const manager_id = null;
+                    addEmployeeQuery(first_name, last_name, role_id, manager_id);
+                    console.log(`Added ${first_name} to the list of employees.`);
+                    promptUser();
+                }
             });
-        } else {
-            employeeData.manager_id = null;
-            return employeeData;
-        }
-    }).then(employeeData => {
-        const first_name = employeeData.first_name;
-        const last_name = employeeData.last_name;
-        const role_id = employeeData.role_id;
-        const manager_id = employeeData.manager_id;
-        addEmployeeQuery(first_name, last_name, role_id, manager_id);
-        console.log(`Added ${first_name} to the list of employees.`);
-        promptUser();
-    })
+        });
+    });
 };
 
 const updateEmployee = () => {
-    return inquirer.prompt([
-        {
-            type: 'input',
-            name: 'id',
-            message: 'Please enter the id of the employee you want to update:',
-            validate: nameInput => {
-                if (nameInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the employee's id!");
-                    return false;
-                }
-            } 
-        },
-        {
-            type: 'input',
-            name: 'role_id',
-            message: "Please enter the employee's new role id:",
-            validate: nameInput => {
-                if (nameInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the new role id!");
-                    return false;
-                }
+    db.query(`SELECT * FROM emp_role`, (error, result) => {
+        const rolesArray = result.map(role => role.id);
+        return inquirer.prompt([
+            {
+                type: 'input',
+                name: 'id',
+                message: 'Please enter the id of the employee you want to update:',
+                validate: nameInput => {
+                    if (nameInput) {
+                        return true;
+                    } else {
+                        console.log("Please enter the employee's id!");
+                        return false;
+                    }
+                } 
+            },
+            {
+                type: 'list',
+                name: 'role_id',
+                message: "Please select the employee's new role id:",
+                choices: rolesArray
             }
-        }
-    ]).then(employeeUpdate => {
-        const id = employeeUpdate.id;
-        const role_id = employeeUpdate.role_id;
-        updateEmployeeQuery(role_id, id);
-        console.log('Updated employee');
-        promptUser();
-    })
+        ]).then(employeeUpdate => {
+            const id = employeeUpdate.id;
+            const role_id = employeeUpdate.role_id;
+            updateEmployeeQuery(role_id, id);
+            console.log('Updated employee');
+            promptUser();
+        })
+    });
 }
 
-const init = () => {
-    promptUser();
-}
-
-module.exports = init;
+module.exports = promptUser;

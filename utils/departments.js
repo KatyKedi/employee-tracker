@@ -1,14 +1,14 @@
 const db = require('../db/connection');
 
 // Get all departments
-const showDepartmentsQuery = () => {
+function showDepartmentsQuery() {
     const sql = 
     `SELECT * FROM department`;
   
     db.query(sql, (error, result) => {
         if (error) throw error;
-        return result;
-    });
+        console.table(result);
+    })
 };
 
 const addDepartmentQuery = (dp_name) => {
@@ -19,7 +19,6 @@ const addDepartmentQuery = (dp_name) => {
 
     db.query(sql, dp_name, (error, result) => {
         if (error) throw error;
-        return;
     });
 };
 

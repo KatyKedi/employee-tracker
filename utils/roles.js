@@ -9,19 +9,22 @@ const showRolesQuery = () => {
     LEFT JOIN department
     ON emp_role.department_id = department.id`;
   
-    db.query(sql, () => {
-        return;
+    db.query(sql, (error, result) => {
+        if (error) throw error;
+        console.table(result);
     });
 };
 
-const addRoleQuery = (title, salary, department) => {
+const addRoleQuery = (title, salary, department_id) => {
     const sql = 
     `INSERT INTO emp_role (title, salary, department_id)
     VALUES (?,?,?)
     `;
 
-    db.query(sql, title, salary, department, (rows) => {
-        return rows;
+    const params = [title, salary, department_id];
+
+    db.query(sql, params, (error, result) => {
+        if (error) throw error;
     });
 };
 
